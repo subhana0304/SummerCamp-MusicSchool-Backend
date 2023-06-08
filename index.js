@@ -30,6 +30,7 @@ async function run() {
 
     const classesCollection = client.db("summer-camp-music").collection("classes");
     const instructorsCollection = client.db("summer-camp-music").collection("instructors");
+    const cartsCollection = client.db("summer-camp-music").collection("carts");
 
     app.get('/classes', async(req, res)=>{
         const result = await classesCollection.find().toArray();
@@ -38,6 +39,14 @@ async function run() {
 
     app.get('/instructors', async(req, res)=>{
         const result = await instructorsCollection.find().toArray();
+        res.send(result);
+    })
+
+    // carts Collection
+    app.post('/carts', async(req, res)=>{
+        const item = req.body;
+        console.log(item);
+        const result = await cartsCollection.insertOne(item);
         res.send(result);
     })
 
