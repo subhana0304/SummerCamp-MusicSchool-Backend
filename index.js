@@ -66,6 +66,15 @@ async function run() {
       }
       next();
     }
+    const verifyInstructor = async (req, res, next) =>{
+      const email = req.decoded.email;
+      const query = { email: email }
+      const user = await usersCollection.findOne(query);
+      if(user?.role !== 'instructor'){
+        return res.status(403).send({error: true, message: 'forbidden message'});
+      }
+      next();
+    }
 
     // users related Apis
     app.get('/users', verifyJWT, verifyAdmin, async(req, res)=>{
@@ -107,7 +116,7 @@ async function run() {
     // check instructor
     app.get('/users/instructor/:email', verifyJWT, async(req, res)=>{
       const email = req.params.email;
-
+      console.log(email);
       if(req.decoded.email !== email){
         res.send({instructor: false})
       }
