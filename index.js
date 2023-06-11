@@ -116,7 +116,7 @@ async function run() {
     // check instructor
     app.get('/users/instructor/:email', verifyJWT, async(req, res)=>{
       const email = req.params.email;
-      console.log(email);
+      // console.log(email);
       if(req.decoded.email !== email){
         res.send({instructor: false})
       }
@@ -160,6 +160,23 @@ async function run() {
     app.post('/classes', verifyJWT, verifyInstructor, async(req, res)=>{
       const newClasses = req.body;
       const result = await classesCollection.insertOne(newClasses);
+      res.send(result);
+    })
+
+    app.get('/instructor-class', verifyJWT, async(req, res) =>{
+      const email = req.query.email;
+      // console.log(email);
+      if(!email){
+        res.send([]);
+      }
+
+      const decodedEmail = req.decoded.email;
+      if(email !== decodedEmail){
+        return res.status(403).send({error:true, message: 'forbidden access'})
+      }
+
+      const query = { email: email };
+      const result = await classesCollection.find(query).toArray();
       res.send(result);
     })
 
