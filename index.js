@@ -157,6 +157,12 @@ async function run() {
         res.send(result);
     })
 
+    app.post('/classes', verifyJWT, verifyInstructor, async(req, res)=>{
+      const newClasses = req.body;
+      const result = await classesCollection.insertOne(newClasses);
+      res.send(result);
+    })
+
     // instructors api
     app.get('/instructors', async(req, res)=>{
         const result = await instructorsCollection.find().toArray();
