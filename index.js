@@ -12,6 +12,7 @@ app.use(express.json());
 
 const verifyJWT = (req, res, next) => {
   const authorization = req.headers.authorization;
+  console.log({authorization});
   if (!authorization) {
     return res.status(401).send({ error: true, message: 'unauthorized access' });
   }
@@ -19,6 +20,7 @@ const verifyJWT = (req, res, next) => {
   const token = authorization.split(' ')[1];
 
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    console.log(err);
     if (err) {
       return res.status(401).send({ error: true, message: 'unauthorized access' })
     }
@@ -100,7 +102,23 @@ async function run() {
     // security layer: verifyJWT
     // email match
     // check admin
-    app.get('/users/admin/:email', verifyJWT, async (req, res) => {
+    // app.get('/users/:email',  async (req, res) => {
+    //   const email = req.params.email;
+
+    //   if (req.decoded.email !== email) {
+    //     res.send({ user: false })
+    //   }
+
+    //   const query = { email: email }
+    //   const user = await usersCollection.findOne(query);
+    //   const result = { admin: user?.role === 'users' }
+    //   res.send(result);
+    // })
+
+    // security layer: verifyJWT
+    // email match
+    // check admin
+    app.get('/users/admin/:email', verifyJWT,  async (req, res) => {
       const email = req.params.email;
 
       if (req.decoded.email !== email) {
@@ -129,7 +147,7 @@ async function run() {
       res.send(result);
     })
 
-    app.patch('/users/admin/:id', async (req, res) => {
+    app.patch('/users/admin/:id', verifyJWT, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
@@ -141,7 +159,7 @@ async function run() {
       res.send(result);
     })
 
-    app.patch('/users/instructor/:id', async (req, res) => {
+    app.patch('/users/instructor/:id',  async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
@@ -165,11 +183,36 @@ async function run() {
       res.send(result);
     })
 
+    app.patch('/classes/approve/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: 'approve'
+        },
+      };
+      const result = await classesCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    })
+
+    app.patch('/classes/deny/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: 'deny'
+        },
+      };
+      const result = await classesCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    })
+
     // instructors api
     app.get('/instructors', async (req, res) => {
       const result = await instructorsCollection.find().toArray();
       res.send(result);
     })
+
 
     app.get('/instructor-class', verifyJWT, async (req, res) => {
       const email = req.query.email;
