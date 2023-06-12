@@ -166,10 +166,10 @@ async function run() {
     })
 
     // instructors api
-    // app.get('/instructors', async (req, res) => {
-    //   const result = await instructorsCollection.find().toArray();
-    //   res.send(result);
-    // })
+    app.get('/instructors', async (req, res) => {
+      const result = await instructorsCollection.find().toArray();
+      res.send(result);
+    })
 
     app.get('/instructor-class', verifyJWT, async (req, res) => {
       const email = req.query.email;
